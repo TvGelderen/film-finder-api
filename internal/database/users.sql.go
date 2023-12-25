@@ -13,41 +13,44 @@ import (
 )
 
 const createUser = `-- name: CreateUser :one
-INSERT INTO users (id, email, created_at, updated_at, name, api_key)
-VALUES ($1, $2, $3, $4, $5, encode(sha256(random()::text::bytea), 'hex'))
-RETURNING id, email, created_at, updated_at, name, api_key
+INSERT INTO users (id, name, email, password_hash, created_at, updated_at, api_key)
+VALUES ($1, $2, $3, $4, $5, $6, encode(sha256(random()::text::bytea), 'hex'))
+RETURNING id, name, email, password_hash, created_at, updated_at, api_key
 `
 
 type CreateUserParams struct {
-	ID        uuid.UUID
-	Email     string
-	CreatedAt time.Time
-	UpdatedAt time.Time
-	Name      string
+	ID           uuid.UUID
+	Name         string
+	Email        string
+	PasswordHash []byte
+	CreatedAt    time.Time
+	UpdatedAt    time.Time
 }
 
 func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (User, error) {
 	row := q.db.QueryRowContext(ctx, createUser,
 		arg.ID,
+		arg.Name,
 		arg.Email,
+		arg.PasswordHash,
 		arg.CreatedAt,
 		arg.UpdatedAt,
-		arg.Name,
 	)
 	var i User
 	err := row.Scan(
 		&i.ID,
+		&i.Name,
 		&i.Email,
+		&i.PasswordHash,
 		&i.CreatedAt,
 		&i.UpdatedAt,
-		&i.Name,
 		&i.ApiKey,
 	)
 	return i, err
 }
 
 const getUserByAPIKey = `-- name: GetUserByAPIKey :one
-SELECT id, email, created_at, updated_at, name, api_key FROM users WHERE api_key = $1
+SELECT id, name, email, password_hash, created_at, updated_at, api_key FROM users WHERE api_key = $1
 `
 
 func (q *Queries) GetUserByAPIKey(ctx context.Context, apiKey string) (User, error) {
@@ -55,10 +58,30 @@ func (q *Queries) GetUserByAPIKey(ctx context.Context, apiKey string) (User, err
 	var i User
 	err := row.Scan(
 		&i.ID,
+		&i.Name,
 		&i.Email,
+		&i.PasswordHash,
 		&i.CreatedAt,
 		&i.UpdatedAt,
+		&i.ApiKey,
+	)
+	return i, err
+}
+
+const getUserByEmail = `-- name: GetUserByEmail :one
+SELECT id, name, email, password_hash, created_at, updated_at, api_key FROM users WHERE email = $1
+`
+
+func (q *Queries) GetUserByEmail(ctx context.Context, email string) (User, error) {
+	row := q.db.QueryRowContext(ctx, getUserByEmail, email)
+	var i User
+	err := row.Scan(
+		&i.ID,
 		&i.Name,
+		&i.Email,
+		&i.PasswordHash,
+		&i.CreatedAt,
+		&i.UpdatedAt,
 		&i.ApiKey,
 	)
 	return i, err

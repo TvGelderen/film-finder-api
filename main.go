@@ -57,8 +57,11 @@ func main() {
     router.Get("/health", handlerSuccess)
     router.Get("/error", handlerError)
 
-    router.Post("/users", apiCfg.handlerCreateUser)
-    router.Get("/users", apiCfg.handlerGetUser)
+    router.Get("/users", apiCfg.middlewareAuth(apiCfg.handlerGetUser))
+
+    // Auth
+    router.Post("/auth/register", apiCfg.handlerRegister)
+    router.Post("/auth/login", apiCfg.handlerLogin)
 
     server := &http.Server {
         Handler: router,
