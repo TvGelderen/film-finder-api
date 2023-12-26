@@ -23,3 +23,19 @@ func mapDbUserToUser(dbUser database.User) User {
         Name: dbUser.Name,
     }
 }
+
+type ReturnUser struct {
+    ID uuid.UUID `json:"id"`
+    Name string `json:"name"`
+    Email string `json:"email"`
+    AccessToken string `json:"accessToken"`
+}
+
+func mapDbUserToReturnUser(dbUser database.User, accessToken string) ReturnUser {
+    return ReturnUser {
+        ID: dbUser.ID,
+        Name: dbUser.Name,
+        Email: dbUser.Email,
+        AccessToken: accessToken,
+    }
+}

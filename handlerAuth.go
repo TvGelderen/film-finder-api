@@ -3,11 +3,11 @@ package main
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/TvGelderen/film-finder-api/internal/database"
+    "net/http"
+    "time"
 	"github.com/google/uuid"
-	"golang.org/x/crypto/bcrypt"
-	"net/http"
-	"time"
+    "github.com/TvGelderen/film-finder-api/internal/database"
+    "github.com/TvGelderen/film-finder-api/internal/auth"
 )
 
 func (apiCfg *apiConfig) handlerRegister(w http.ResponseWriter, r *http.Request) {
@@ -25,12 +25,12 @@ func (apiCfg *apiConfig) handlerRegister(w http.ResponseWriter, r *http.Request)
 		respondWithError(w, 400, fmt.Sprintf("Error parsing JSON: %v", err))
 	}
 
-	passwordHash, err := HashPassword(params.Password)
+	passwordHash, err := auth.HashPassword(params.Password)
 	if err != nil {
 		respondWithError(w, 400, fmt.Sprintf("Error hashing password: %v", err))
 	}
 
-	user, err := apiCfg.DB.CreateUser(r.Context(), database.CreateUserParams{
+    _, err = apiCfg.DB.CreateUser(r.Context(), database.CreateUserParams{
 		ID:           uuid.New(),
 		Name:         params.Name,
 		Email:        params.Email,
@@ -43,7 +43,7 @@ func (apiCfg *apiConfig) handlerRegister(w http.ResponseWriter, r *http.Request)
 		return
 	}
 
-	respondWithJSON(w, 201, mapDbUserToUser(user))
+	respondWithJSON(w, 201, "User successfully created")
 }
 
 func (apiCfg *apiConfig) handlerLogin(w http.ResponseWriter, r *http.Request) {
@@ -65,22 +65,17 @@ func (apiCfg *apiConfig) handlerLogin(w http.ResponseWriter, r *http.Request) {
 		respondWithError(w, 401, "Invalid email or password")
 	}
 
-	correctPassword := CheckPasswordWithHash(params.Password, user.PasswordHash)
+	correctPassword := auth.CheckPasswordWithHash(params.Password, user.PasswordHash)
 
 	if !correctPassword {
 		respondWithError(w, 401, "Invalid email or password")
 		return
 	}
 
-	respondWithJSON(w, 200, mapDbUserToUser(user))
-}
+    token, err := auth.CreateNewJWT(user.ID, user.Name)
+    if err != nil {
+        respondWithError(w, 400, "Failed to create JWT")
+    }
 
-func HashPassword(password string) ([]byte, error) {
-	bytes, err := bcrypt.GenerateFromPassword([]byte(password), 12)
-	return bytes, err
-}
-
-func CheckPasswordWithHash(password string, hash []byte) bool {
-	err := bcrypt.CompareHashAndPassword(hash, []byte(password))
-	return err == nil
+	respondWithJSON(w, 200, mapDbUserToReturnUser(user, token))
 }

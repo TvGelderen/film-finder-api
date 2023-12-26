@@ -23,5 +23,4 @@ type User struct {
 	PasswordHash []byte
 	CreatedAt    time.Time
 	UpdatedAt    time.Time
-	ApiKey       string
 }
