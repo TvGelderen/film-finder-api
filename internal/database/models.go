@@ -10,6 +10,12 @@ import (
 	"github.com/google/uuid"
 )
 
+type SavedMovie struct {
+	ID      int32
+	MovieID int32
+	UserID  uuid.UUID
+}
+
 type User struct {
 	ID           uuid.UUID
 	Name         string

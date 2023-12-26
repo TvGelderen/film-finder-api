@@ -53,15 +53,17 @@ func main() {
         MaxAge: 300,
     }))
 
-    // Testing endpoints
     router.Get("/health", handlerSuccess)
-    router.Get("/error", handlerError)
 
     router.Get("/users", apiCfg.middlewareAuth(apiCfg.handlerGetUser))
 
     // Auth
     router.Post("/auth/register", apiCfg.handlerRegister)
     router.Post("/auth/login", apiCfg.handlerLogin)
+
+    // Save movies
+    router.Post("/movies/save", apiCfg.middlewareAuth(apiCfg.handlerSaveMovie))
+    router.Get("/movies", apiCfg.middlewareAuth(apiCfg.handlerGetSavedMovies))
 
     server := &http.Server {
         Handler: router,
