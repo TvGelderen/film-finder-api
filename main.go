@@ -40,15 +40,6 @@ func main() {
 
     router := chi.NewRouter()
 
-    // router.Use(cors.Handler(cors.Options {
-    //     AllowedOrigins: []string { "https://*", "http://*" },
-    //     AllowedMethods: []string { "GET", "POST", "PUT", "DELETE", "OPTIONS" },
-    //     AllowedHeaders: []string { "*" },
-    //     ExposedHeaders: []string { "Link" },
-    //     AllowCredentials: false,
-    //     MaxAge: 300,
-    // }))
-
     router.Get("/health", handlers.HandlerSuccess)
 
     router.Get("/users", apiCfg.MiddlewareAuth(apiCfg.HandlerGetUser))
@@ -56,6 +47,7 @@ func main() {
     // Auth
     router.Post("/auth/register", apiCfg.HandlerRegister)
     router.Post("/auth/login", apiCfg.HandlerLogin)
+    router.Post("/auth/logout", apiCfg.MiddlewareAuth(apiCfg.HandlerLogout))
 
     // Save movies
     router.Post("/movies/save", apiCfg.MiddlewareAuth(apiCfg.HandlerSaveMovie))

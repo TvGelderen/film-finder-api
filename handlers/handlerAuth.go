@@ -81,3 +81,7 @@ func (apiCfg *ApiConfig) HandlerLogin(w http.ResponseWriter, r *http.Request) {
     
 	respondWithJSON(w, 200, mapDbUserToReturnUser(user))
 }
+
+func (apiCfg *ApiConfig) HandlerLogout(w http.ResponseWriter, r *http.Request, user database.User) {
+    auth.RemoveToken(w)
+}

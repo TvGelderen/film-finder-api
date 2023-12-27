@@ -29,6 +29,17 @@ func SetToken(w http.ResponseWriter, token string) {
     http.SetCookie(w, &cookie)
 }
 
+func RemoveToken(w http.ResponseWriter) {
+    cookie := http.Cookie{
+        Name: "AccessToken",
+        Value: "",
+        MaxAge: 0,
+        HttpOnly: true,
+    }
+
+    http.SetCookie(w, &cookie)
+}
+
 func GetToken(r *http.Request) (string, error) {
     cookie, err := r.Cookie("AccessToken")
     if err != nil {
