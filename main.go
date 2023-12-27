@@ -8,7 +8,6 @@ import (
     "net/http"
     "github.com/joho/godotenv"
     "github.com/go-chi/chi/v5"
-    "github.com/go-chi/cors"
     "github.com/TvGelderen/film-finder-api/internal/database"
     "github.com/TvGelderen/film-finder-api/handlers"
 
@@ -41,14 +40,14 @@ func main() {
 
     router := chi.NewRouter()
 
-    router.Use(cors.Handler(cors.Options {
-        AllowedOrigins: []string { "https://*", "http://*" },
-        AllowedMethods: []string { "GET", "POST", "PUT", "DELETE", "OPTIONS" },
-        AllowedHeaders: []string { "*" },
-        ExposedHeaders: []string { "Link" },
-        AllowCredentials: false,
-        MaxAge: 300,
-    }))
+    // router.Use(cors.Handler(cors.Options {
+    //     AllowedOrigins: []string { "https://*", "http://*" },
+    //     AllowedMethods: []string { "GET", "POST", "PUT", "DELETE", "OPTIONS" },
+    //     AllowedHeaders: []string { "*" },
+    //     ExposedHeaders: []string { "Link" },
+    //     AllowCredentials: false,
+    //     MaxAge: 300,
+    // }))
 
     router.Get("/health", handlers.HandlerSuccess)
 

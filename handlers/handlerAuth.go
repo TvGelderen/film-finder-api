@@ -77,5 +77,7 @@ func (apiCfg *ApiConfig) HandlerLogin(w http.ResponseWriter, r *http.Request) {
         respondWithError(w, 400, "Failed to create JWT")
     }
 
-	respondWithJSON(w, 200, mapDbUserToReturnUser(user, token))
+    auth.SetToken(w, token)
+    
+	respondWithJSON(w, 200, mapDbUserToReturnUser(user))
 }

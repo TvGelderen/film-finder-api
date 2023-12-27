@@ -5,7 +5,6 @@ import (
 	"log"
 	"net/http"
 	"os"
-	"strings"
 
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/google/uuid"
@@ -19,18 +18,27 @@ type CustomClaims struct {
     jwt.RegisteredClaims
 }
 
-func GetToken(headers http.Header) (string, error) {
-    val := headers.Get("Authorization")
-    if val == "" {
-        return "", errors.New("no authentication token found")
+func SetToken(w http.ResponseWriter, token string) {
+    cookie := http.Cookie{
+        Name: "AccessToken",
+        Value: token,
+        MaxAge: 36000,
+        HttpOnly: true,
     }
 
-    vals := strings.Split(val, " ")
-    if len(vals) != 2 || vals[0] != "Bearer" {
-        return "", errors.New("malformed authentication header")
+    http.SetCookie(w, &cookie)
+}
+
+func GetToken(r *http.Request) (string, error) {
+    cookie, err := r.Cookie("AccessToken")
+    if err != nil {
+        if errors.Is(err, http.ErrNoCookie) {
+            return "", errors.New("cookie not found")
+        }
+        return "", err
     }
 
-    return vals[1], nil
+    return cookie.Value, nil
 }
 
 func HashPassword(password string) ([]byte, error) {
