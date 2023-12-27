@@ -1,4 +1,4 @@
-package main
+package handlers
 
 import (
 	"encoding/json"
@@ -8,7 +8,7 @@ import (
 	"github.com/TvGelderen/film-finder-api/internal/database"
 )
 
-func (apiCfg *apiConfig) handlerSaveMovie(w http.ResponseWriter, r *http.Request, user database.User) {
+func (apiCfg *ApiConfig) HandlerSaveMovie(w http.ResponseWriter, r *http.Request, user database.User) {
 	type parameters struct {
 		MovieId int32 `json:"movieId"`
 	}
@@ -30,7 +30,7 @@ func (apiCfg *apiConfig) handlerSaveMovie(w http.ResponseWriter, r *http.Request
     respondWithJSON(w, 201, movie)
 }
 
-func (apiCfg *apiConfig) handlerGetSavedMovies(w http.ResponseWriter, r *http.Request, user database.User) {
+func (apiCfg *ApiConfig) HandlerGetSavedMovies(w http.ResponseWriter, r *http.Request, user database.User) {
     movies, err := apiCfg.DB.GetUserSavedMovies(r.Context(), user.ID)
     if err != nil {
         respondWithError(w, 400, "Error retrieving saved movies")

@@ -1,10 +1,14 @@
-package main
+package handlers
 
 import (
     "time"
     "github.com/google/uuid"
     "github.com/TvGelderen/film-finder-api/internal/database"
 )
+
+type ApiConfig struct {
+    DB *database.Queries
+}
 
 type User struct {
     ID uuid.UUID `json:"id"`

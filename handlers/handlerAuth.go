@@ -1,4 +1,4 @@
-package main
+package handlers
 
 import (
 	"encoding/json"
@@ -10,7 +10,7 @@ import (
     "github.com/TvGelderen/film-finder-api/internal/auth"
 )
 
-func (apiCfg *apiConfig) handlerRegister(w http.ResponseWriter, r *http.Request) {
+func (apiCfg *ApiConfig) HandlerRegister(w http.ResponseWriter, r *http.Request) {
 	type parameters struct {
 		Name     string `json:"name"`
 		Email    string `json:"email"`
@@ -46,7 +46,7 @@ func (apiCfg *apiConfig) handlerRegister(w http.ResponseWriter, r *http.Request)
 	respondWithJSON(w, 201, "User successfully created")
 }
 
-func (apiCfg *apiConfig) handlerLogin(w http.ResponseWriter, r *http.Request) {
+func (apiCfg *ApiConfig) HandlerLogin(w http.ResponseWriter, r *http.Request) {
 	type parameters struct {
 		Email    string `json:"email"`
 		Password string `json:"password"`

@@ -10,13 +10,10 @@ import (
     "github.com/go-chi/chi/v5"
     "github.com/go-chi/cors"
     "github.com/TvGelderen/film-finder-api/internal/database"
+    "github.com/TvGelderen/film-finder-api/handlers"
 
     _ "github.com/lib/pq"
 )
-
-type apiConfig struct {
-    DB *database.Queries
-}
 
 func main() {
     godotenv.Load(".env")
@@ -36,7 +33,7 @@ func main() {
         log.Fatal("Unable to establish connection with database: ", err)
     }
 
-    apiCfg := apiConfig {
+    apiCfg := handlers.ApiConfig {
         DB: database.New(connection),
     }
 
@@ -53,17 +50,17 @@ func main() {
         MaxAge: 300,
     }))
 
-    router.Get("/health", handlerSuccess)
+    router.Get("/health", handlers.HandlerSuccess)
 
-    router.Get("/users", apiCfg.middlewareAuth(apiCfg.handlerGetUser))
+    router.Get("/users", apiCfg.MiddlewareAuth(apiCfg.HandlerGetUser))
 
     // Auth
-    router.Post("/auth/register", apiCfg.handlerRegister)
-    router.Post("/auth/login", apiCfg.handlerLogin)
+    router.Post("/auth/register", apiCfg.HandlerRegister)
+    router.Post("/auth/login", apiCfg.HandlerLogin)
 
     // Save movies
-    router.Post("/movies/save", apiCfg.middlewareAuth(apiCfg.handlerSaveMovie))
-    router.Get("/movies", apiCfg.middlewareAuth(apiCfg.handlerGetSavedMovies))
+    router.Post("/movies/save", apiCfg.MiddlewareAuth(apiCfg.HandlerSaveMovie))
+    router.Get("/movies", apiCfg.MiddlewareAuth(apiCfg.HandlerGetSavedMovies))
 
     server := &http.Server {
         Handler: router,
