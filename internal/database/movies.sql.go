@@ -38,6 +38,20 @@ func (q *Queries) GetUserSavedMovies(ctx context.Context, userID uuid.UUID) ([]i
 	return items, nil
 }
 
+const removeMovie = `-- name: RemoveMovie :exec
+DELETE FROM saved_movies WHERE movie_id = $1 AND user_id = $2
+`
+
+type RemoveMovieParams struct {
+	MovieID int32
+	UserID  uuid.UUID
+}
+
+func (q *Queries) RemoveMovie(ctx context.Context, arg RemoveMovieParams) error {
+	_, err := q.db.ExecContext(ctx, removeMovie, arg.MovieID, arg.UserID)
+	return err
+}
+
 const saveMovie = `-- name: SaveMovie :one
 INSERT INTO saved_movies(movie_id, user_id)
 VALUES ($1, $2)

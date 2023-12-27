@@ -39,3 +39,29 @@ func (apiCfg *ApiConfig) HandlerGetSavedMovies(w http.ResponseWriter, r *http.Re
 
 	respondWithJSON(w, 200, movies)
 }
+
+func (apiCfg *ApiConfig) HandlerRemoveMovie(w http.ResponseWriter, r *http.Request, user database.User) {
+	type parameters struct {
+		MovieId int32 `json:"movieId"`
+	}
+
+	decoder := json.NewDecoder(r.Body)
+
+	params := parameters{}
+	err := decoder.Decode(&params)
+	if err != nil {
+		respondWithError(w, 400, fmt.Sprintf("Error parsing JSON: %v", err))
+        return
+	}
+
+    err = apiCfg.DB.RemoveMovie(r.Context(), database.RemoveMovieParams{
+        MovieID: params.MovieId, 
+        UserID: user.ID,
+    })
+    if err != nil {
+        respondWithError(w, 400, "Error removing movie")
+        return
+    }
+
+	respondWithJSON(w, 200, "Movie removed successfully")
+}

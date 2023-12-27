@@ -23,6 +23,7 @@ func SetToken(w http.ResponseWriter, token string) {
         Name: "AccessToken",
         Value: token,
         MaxAge: 36000,
+        Path: "/",
         HttpOnly: true,
     }
 
@@ -34,6 +35,7 @@ func RemoveToken(w http.ResponseWriter) {
         Name: "AccessToken",
         Value: "",
         MaxAge: 0,
+        Path: "/",
         HttpOnly: true,
     }
 

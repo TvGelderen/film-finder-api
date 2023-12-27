@@ -3,11 +3,13 @@ package handlers
 import (
 	"encoding/json"
 	"fmt"
-    "net/http"
-    "time"
+	"net/http"
+	"strings"
+	"time"
+
+	"github.com/TvGelderen/film-finder-api/internal/auth"
+	"github.com/TvGelderen/film-finder-api/internal/database"
 	"github.com/google/uuid"
-    "github.com/TvGelderen/film-finder-api/internal/database"
-    "github.com/TvGelderen/film-finder-api/internal/auth"
 )
 
 func (apiCfg *ApiConfig) HandlerRegister(w http.ResponseWriter, r *http.Request) {
@@ -39,6 +41,10 @@ func (apiCfg *ApiConfig) HandlerRegister(w http.ResponseWriter, r *http.Request)
 		UpdatedAt:    time.Now().UTC(),
 	})
 	if err != nil {
+        if strings.Contains(err.Error(), "users_email_key") {
+            respondWithError(w, 400, fmt.Sprintf("That email is already taken"))
+            return
+        }
 		respondWithError(w, 400, fmt.Sprintf("Unable to create user: %v", err))
 		return
 	}
@@ -57,12 +63,15 @@ func (apiCfg *ApiConfig) HandlerLogin(w http.ResponseWriter, r *http.Request) {
 	params := parameters{}
 	err := decoder.Decode(&params)
 	if err != nil {
+        fmt.Printf("error: %v\n", err)
 		respondWithError(w, 400, fmt.Sprintf("Error parsing JSON: %v", err))
+        return
 	}
 
 	user, err := apiCfg.DB.GetUserByEmail(r.Context(), params.Email)
 	if err != nil {
 		respondWithError(w, 401, "Invalid email or password")
+        return
 	}
 
 	correctPassword := auth.CheckPasswordWithHash(params.Password, user.PasswordHash)
@@ -75,6 +84,7 @@ func (apiCfg *ApiConfig) HandlerLogin(w http.ResponseWriter, r *http.Request) {
     token, err := auth.CreateNewJWT(user.ID, user.Name)
     if err != nil {
         respondWithError(w, 400, "Failed to create JWT")
+        return
     }
 
     auth.SetToken(w, token)

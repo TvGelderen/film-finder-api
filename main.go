@@ -8,6 +8,7 @@ import (
     "net/http"
     "github.com/joho/godotenv"
     "github.com/go-chi/chi/v5"
+    "github.com/go-chi/cors"
     "github.com/TvGelderen/film-finder-api/internal/database"
     "github.com/TvGelderen/film-finder-api/handlers"
 
@@ -40,6 +41,15 @@ func main() {
 
     router := chi.NewRouter()
 
+    router.Use(cors.Handler(cors.Options {
+        AllowedOrigins: []string { "https://*", "http://*" },
+        AllowedMethods: []string { "GET", "POST", "PUT", "DELETE", "OPTIONS" },
+        AllowedHeaders: []string { "*" },
+        ExposedHeaders: []string { "Link" },
+        AllowCredentials: true,
+        MaxAge: 300,
+    }))
+
     router.Get("/health", handlers.HandlerSuccess)
 
     router.Get("/users", apiCfg.MiddlewareAuth(apiCfg.HandlerGetUser))
@@ -50,8 +60,9 @@ func main() {
     router.Post("/auth/logout", apiCfg.MiddlewareAuth(apiCfg.HandlerLogout))
 
     // Save movies
-    router.Post("/movies/save", apiCfg.MiddlewareAuth(apiCfg.HandlerSaveMovie))
     router.Get("/movies", apiCfg.MiddlewareAuth(apiCfg.HandlerGetSavedMovies))
+    router.Post("/movies", apiCfg.MiddlewareAuth(apiCfg.HandlerSaveMovie))
+    router.Delete("/movies", apiCfg.MiddlewareAuth(apiCfg.HandlerRemoveMovie))
 
     server := &http.Server {
         Handler: router,
